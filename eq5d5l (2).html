@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EQ-5D-5L — Calculadora Clínica FSHD</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f7f5;--bg3:#f0efe9;
+  --text:#1a1a18;--text2:#5a5a56;--text3:#9a9a94;
+  --border:#e0dfd8;--border2:#c8c7c0;
+  --blue-bg:#e6f1fb;--blue-text:#0c447c;--blue-bdr:#378add;
+  --green-bg:#eaf3de;--green-txt:#27500a;--green-bdr:#639922;
+  --amber-bg:#faeeda;--amber-txt:#633806;--amber-bdr:#ef9f27;
+  --red-bg:#fcebeb;--red-txt:#a32d2d;--red-bdr:#e24b4a;
+  --radius:8px;--radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1e1e1c;--bg2:#282824;--bg3:#323230;
+    --text:#f0efe9;--text2:#b0b0a8;--text3:#707068;
+    --border:#3a3a36;--border2:#505048;
+    --blue-bg:#0c2a4a;--blue-text:#85b7eb;--blue-bdr:#185fa5;
+    --green-bg:#17340a;--green-txt:#c0dd97;--green-bdr:#3b6d11;
+    --amber-bg:#2a1a04;--amber-txt:#fac775;--amber-bdr:#854f0b;
+    --red-bg:#2a0c0c;--red-txt:#f09595;--red-bdr:#a32d2d;
+  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding:1.5rem 1rem 3rem}
+.container{max-width:720px;margin:0 auto}
+
+.header{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.header-title h1{font-size:20px;font-weight:500;color:var(--text)}
+.header-title p{font-size:13px;color:var(--text2);margin-top:2px}
+.badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--blue-bg);color:var(--blue-text);border:0.5px solid var(--blue-bdr);white-space:nowrap;align-self:flex-start}
+
+.patient-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem}
+@media(max-width:480px){.patient-grid{grid-template-columns:1fr 1fr}}
+.patient-grid input{width:100%;font-size:13px;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);transition:border-color .15s}
+.patient-grid input::placeholder{color:var(--text3)}
+.patient-grid input:focus{outline:none;border-color:var(--blue-bdr)}
+
+.instr{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--text2);line-height:1.5}
+.instr strong{color:var(--text)}
+
+.dim-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);margin-bottom:.75rem;overflow:hidden}
+.dim-header{display:flex;align-items:center;gap:10px;padding:.75rem 1rem;border-bottom:0.5px solid var(--border)}
+.dim-num{width:24px;height:24px;border-radius:50%;background:var(--blue-bg);color:var(--blue-text);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dim-name{font-size:15px;font-weight:500;color:var(--text);flex:1}
+.dim-sub{font-size:11px;color:var(--text2);font-weight:400;margin-top:1px}
+.dim-badge{font-size:11px;padding:2px 8px;border-radius:12px;background:var(--bg2);color:var(--text2);border:0.5px solid var(--border);white-space:nowrap}
+.dim-badge.answered{background:var(--green-bg);color:var(--green-txt);border-color:var(--green-bdr)}
+
+.opt-item{display:flex;align-items:center;gap:10px;padding:.6rem 1rem;cursor:pointer;border-bottom:0.5px solid var(--border);transition:background .1s;-webkit-tap-highlight-color:transparent}
+.opt-item:last-child{border-bottom:none}
+.opt-item:hover{background:var(--bg2)}
+.opt-item.selected{background:var(--blue-bg)}
+.opt-item.selected .opt-circle{background:var(--blue-bg);border-color:var(--blue-bdr);color:var(--blue-text)}
+.opt-item.selected .opt-text{color:var(--blue-text);font-weight:500}
+.opt-circle{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);background:var(--bg);font-size:12px;font-weight:500;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
+.opt-text{font-size:13px;color:var(--text);line-height:1.35}
+
+.eva-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.eva-card h2{font-size:15px;font-weight:500;color:var(--text);margin-bottom:.4rem}
+.eva-card p{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.5}
+.eva-slider-row{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+.eva-slider-row label{font-size:12px;color:var(--text2);white-space:nowrap}
+input[type=range]{flex:1;accent-color:var(--blue-bdr);cursor:pointer}
+.eva-number{text-align:center;margin-top:.5rem}
+.eva-number span{font-size:28px;font-weight:500;color:var(--text)}
+.eva-number small{font-size:12px;color:var(--text2);display:block;margin-top:2px}
+
+.result-panel{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1rem}
+.result-grid{display:grid;grid-template-columns:1fr 1fr 1fr}
+.result-cell{padding:.85rem 1rem;text-align:center;border-right:0.5px solid var(--border)}
+.result-cell:last-child{border-right:none}
+.r-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);margin-bottom:4px}
+.r-val{font-size:22px;font-weight:500;color:var(--text)}
+.r-val.good{color:var(--green-txt)}
+.r-val.mid{color:var(--amber-txt)}
+.r-val.bad{color:var(--red-txt)}
+
+.profile-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:.65rem 1rem;border-top:0.5px solid var(--border);font-size:12px;color:var(--text2)}
+.profile-code{font-family:monospace;font-size:15px;font-weight:500;color:var(--text);background:var(--bg2);padding:2px 10px;border-radius:4px;border:0.5px solid var(--border);letter-spacing:3px}
+
+.domain-bars{padding:.85rem 1rem;border-top:0.5px solid var(--border)}
+.db-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.db-row:last-child{margin-bottom:0}
+.db-name{font-size:12px;color:var(--text2);width:110px;flex-shrink:0}
+.db-track{flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.db-fill{height:100%;border-radius:4px;transition:width .3s,background .3s}
+.db-score{font-size:12px;font-weight:500;color:var(--text);min-width:26px;text-align:right}
+
+.interp-bar{padding:.7rem 1rem;font-size:13px;font-weight:500;text-align:center;border-top:0.5px solid var(--border)}
+.i-nc{background:var(--bg2);color:var(--text2)}
+.i-good{background:var(--green-bg);color:var(--green-txt)}
+.i-mid{background:var(--amber-bg);color:var(--amber-txt)}
+.i-bad{background:var(--red-bg);color:var(--red-txt)}
+
+.note-box{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1rem;font-size:12px;color:var(--text2);line-height:1.5}
+.note-box strong{color:var(--text)}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem}
+.btn{padding:8px 16px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:13px;color:var(--text);transition:background .12s,transform .08s}
+.btn:hover{background:var(--bg2)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--blue-bg);border-color:var(--blue-bdr);color:var(--blue-text);font-weight:500}
+.btn-primary:hover{filter:brightness(.95)}
+
+.footer{font-size:11px;color:var(--text3);text-align:center;padding-top:.75rem;border-top:0.5px solid var(--border);line-height:1.6}
+
+@media print{
+  body{background:white;padding:.5rem}
+  .actions{display:none}
+  .result-panel{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-title">
+      <h1>EQ-5D-5L — Calidad de vida</h1>
+      <p>EuroQol Group · 5 dimensiones · Escala EVA 0–100 · Versión en español</p>
+    </div>
+    <span class="badge">FSHD · Consulta</span>
+  </div>
+
+  <div class="patient-grid">
+    <input id="pNombre" placeholder="Nombre del paciente" autocomplete="off">
+    <input id="pFecha"  placeholder="Fecha (dd/mm/aaaa)" autocomplete="off">
+    <input id="pHC"     placeholder="N.º historia clínica" autocomplete="off">
+  </div>
+
+  <div class="instr">
+    <strong>Instrucciones:</strong> Para cada una de las siguientes áreas, marque la opción que mejor describe cómo se encuentra <strong>hoy</strong>. No hay respuestas correctas o incorrectas.
+  </div>
+
+  <div id="dims-container"></div>
+
+  <div class="eva-card">
+    <h2>Escala EVA — Su salud hoy</h2>
+    <p>Imagine una escala de 0 a 100 donde <strong>100</strong> es la mejor salud que pueda imaginarse y <strong>0</strong> es la peor salud que pueda imaginarse. Mueva el deslizador para indicar cómo está su salud <strong>hoy</strong>.</p>
+    <div class="eva-slider-row">
+      <label>0<br><small style="font-size:10px">Peor</small></label>
+      <input type="range" id="eva-slider" min="0" max="100" value="50" step="1">
+      <label style="text-align:right">100<br><small style="font-size:10px">Mejor</small></label>
+    </div>
+    <div class="eva-number">
+      <span id="eva-display">50</span>
+      <small>EVA — salud hoy</small>
+    </div>
+  </div>
+
+  <div class="result-panel">
+    <div class="result-grid">
+      <div class="result-cell">
+        <div class="r-lbl">Dimensiones</div>
+        <div class="r-val" id="r-count">0 / 5</div>
+      </div>
+      <div class="result-cell">
+        <div class="r-lbl">EVA</div>
+        <div class="r-val mid" id="r-eva">50</div>
+      </div>
+      <div class="result-cell">
+        <div class="r-lbl">Índice EQ</div>
+        <div class="r-val" id="r-index">—</div>
+      </div>
+    </div>
+    <div class="profile-bar">
+      <span>Perfil EQ-5D:</span>
+      <span class="profile-code" id="r-profile">— — — — —</span>
+      <span style="font-size:11px;color:var(--text3)">(1 = sin problemas &rarr; 5 = incapaz / extremo)</span>
+    </div>
+    <div class="domain-bars" id="domain-bars"></div>
+    <div class="interp-bar i-nc" id="r-interp">Complete las 5 dimensiones para ver el índice EQ</div>
+  </div>
+
+  <div class="note-box">
+    <strong>Nota sobre el índice EQ:</strong> El índice se calcula con pesos de referencia para población latinoamericana. El rango va de 0 (estado equivalente a muerte) a 1 (salud perfecta); valores negativos son posibles en estados de salud considerados peores que la muerte. Para estudios clínicos formales utilice la tarifa de valores oficial del EuroQol Group para su país.
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="resetAll()">&#8635; Limpiar todo</button>
+    <button class="btn btn-primary" onclick="window.print()">&#128438; Imprimir / PDF</button>
+  </div>
+
+  <div class="footer">
+    EQ-5D-5L &copy; EuroQol Research Foundation. EQ-5D&trade; es una marca registrada del EuroQol Research Foundation.
+    Para uso clínico/investigación oficial, registre su uso en <a href="https://euroqol.org" style="color:var(--blue-text)">euroqol.org</a>.
+    <br>Pesos de referencia: Augustovski F, et al. (2016). <em>Qual Life Res</em> 25(9):2161-2170.
+  </div>
+
+</div>
+
+<script>
+const DIMS = [
+  {
+    id:"mo",n:1,name:"Movilidad",sub:null,
+    opts:[
+      "No tengo problemas para caminar",
+      "Tengo problemas leves para caminar",
+      "Tengo problemas moderados para caminar",
+      "Tengo problemas graves para caminar",
+      "No puedo caminar"
+    ]
+  },
+  {
+    id:"cu",n:2,name:"Cuidado personal",sub:null,
+    opts:[
+      "No tengo problemas para lavarme o vestirme",
+      "Tengo problemas leves para lavarme o vestirme",
+      "Tengo problemas moderados para lavarme o vestirme",
+      "Tengo problemas graves para lavarme o vestirme",
+      "No puedo lavarme ni vestirme"
+    ]
+  },
+  {
+    id:"ac",n:3,name:"Actividades cotidianas",
+    sub:"trabajo, estudios, tareas del hogar, actividades en familia o de ocio",
+    opts:[
+      "No tengo problemas para realizar mis actividades cotidianas",
+      "Tengo problemas leves para realizar mis actividades cotidianas",
+      "Tengo problemas moderados para realizar mis actividades cotidianas",
+      "Tengo problemas graves para realizar mis actividades cotidianas",
+      "No puedo realizar mis actividades cotidianas"
+    ]
+  },
+  {
+    id:"do",n:4,name:"Dolor / malestar",sub:null,
+    opts:[
+      "No tengo dolor ni malestar",
+      "Tengo dolor o malestar leve",
+      "Tengo dolor o malestar moderado",
+      "Tengo dolor o malestar grave",
+      "Tengo dolor o malestar extremo"
+    ]
+  },
+  {
+    id:"an",n:5,name:"Ansiedad / depresión",sub:null,
+    opts:[
+      "No estoy ansioso/a ni deprimido/a",
+      "Estoy levemente ansioso/a o deprimido/a",
+      "Estoy moderadamente ansioso/a o deprimido/a",
+      "Estoy muy ansioso/a o deprimido/a",
+      "Estoy extremadamente ansioso/a o deprimido/a"
+    ]
+  }
+];
+
+const EQ_W   = [-0.115,-0.055,-0.022,-0.036,-0.101];
+const EQ_DEC = [0,0.058,0.109,0.219,0.371];
+const ans = {};
+let evaVal = 50;
+
+function buildDims() {
+  const c = document.getElementById('dims-container');
+  DIMS.forEach(dim => {
+    const card = document.createElement('div');
+    card.className = 'dim-card';
+    let nameHTML = `<div class="dim-name">${dim.name}`;
+    if (dim.sub) nameHTML += `<div class="dim-sub">${dim.sub}</div>`;
+    nameHTML += '</div>';
+    card.innerHTML = `
+      <div class="dim-header">
+        <div class="dim-num">${dim.n}</div>
+        ${nameHTML}
+        <div class="dim-badge" id="badge-${dim.id}">Sin respuesta</div>
+      </div>
+      <div id="opts-${dim.id}"></div>`;
+    const optWrap = card.querySelector('#opts-' + dim.id);
+    dim.opts.forEach((text, i) => {
+      const row = document.createElement('div');
+      row.className = 'opt-item';
+      row.dataset.dim = dim.id;
+      row.dataset.val = i + 1;
+      row.innerHTML =
+        `<div class="opt-circle">${i+1}</div>` +
+        `<div class="opt-text">${text}</div>`;
+      row.addEventListener('click', () => selectOpt(dim.id, i + 1));
+      optWrap.appendChild(row);
+    });
+    c.appendChild(card);
+  });
+  buildDomainBars();
+}
+
+function selectOpt(dimId, val) {
+  ans[dimId] = val;
+  document.querySelectorAll(`.opt-item[data-dim="${dimId}"]`).forEach(r => {
+    r.classList.toggle('selected', +r.dataset.val === val);
+  });
+  const levels = ['Sin respuesta','Nivel 1 — Sin problemas','Nivel 2 — Leve','Nivel 3 — Moderado','Nivel 4 — Grave','Nivel 5 — Extremo'];
+  const badge = document.getElementById('badge-' + dimId);
+  badge.textContent = levels[val];
+  badge.className = 'dim-badge answered';
+  updateResult();
+}
+
+document.getElementById('eva-slider').addEventListener('input', function() {
+  evaVal = +this.value;
+  document.getElementById('eva-display').textContent = this.value;
+  const el = document.getElementById('r-eva');
+  el.textContent = this.value;
+  el.className = 'r-val ' + (evaVal >= 70 ? 'good' : evaVal >= 40 ? 'mid' : 'bad');
+});
+
+function calcIndex() {
+  let idx = 1.0;
+  const order = ['mo','cu','ac','do','an'];
+  let anyAbove1 = false;
+  order.forEach((id, i) => {
+    const v = ans[id] || 1;
+    if (v > 1) anyAbove1 = true;
+    idx += EQ_W[i] * (v - 1);
+    if (v > 1) idx -= EQ_DEC[v - 1] * 0.05;
+  });
+  if (anyAbove1) idx -= 0.071;
+  return Math.round(Math.max(0, Math.min(1, idx)) * 1000) / 1000;
+}
+
+function updateResult() {
+  const answered = Object.keys(ans).length;
+  document.getElementById('r-count').textContent = answered + ' / 5';
+
+  const order = ['mo','cu','ac','do','an'];
+  const profileStr = order.map(id => ans[id] || '\u2014').join(' ');
+  document.getElementById('r-profile').textContent = profileStr;
+
+  updateDomainBars();
+
+  const interp = document.getElementById('r-interp');
+  if (answered < 5) {
+    document.getElementById('r-index').textContent = '—';
+    document.getElementById('r-index').className = 'r-val';
+    interp.className = 'interp-bar i-nc';
+    interp.textContent = 'Complete las 5 dimensiones para calcular el índice EQ';
+    return;
+  }
+
+  const idx = calcIndex();
+  const idxEl = document.getElementById('r-index');
+  idxEl.textContent = idx.toFixed(3);
+  idxEl.className = 'r-val ' + (idx >= 0.8 ? 'good' : idx >= 0.5 ? 'mid' : 'bad');
+
+  let txt, cls;
+  if      (idx >= 0.85) { txt = 'Calidad de vida buena  (índice: ' + idx.toFixed(3) + ')';          cls = 'i-good'; }
+  else if (idx >= 0.65) { txt = 'Calidad de vida moderada  (índice: ' + idx.toFixed(3) + ')';        cls = 'i-mid';  }
+  else if (idx >= 0.40) { txt = 'Calidad de vida reducida  (índice: ' + idx.toFixed(3) + ')';        cls = 'i-mid';  }
+  else                  { txt = 'Calidad de vida muy reducida  (índice: ' + idx.toFixed(3) + ')';    cls = 'i-bad';  }
+
+  interp.className = 'interp-bar ' + cls;
+  interp.textContent = txt + '  ·  EVA: ' + evaVal + '/100';
+}
+
+function buildDomainBars() {
+  const c = document.getElementById('domain-bars');
+  c.innerHTML = '';
+  DIMS.forEach(dim => {
+    const row = document.createElement('div');
+    row.className = 'db-row';
+    row.innerHTML =
+      `<div class="db-name">${dim.name}</div>` +
+      `<div class="db-track"><div class="db-fill" id="dbf-${dim.id}" style="width:20%;background:${barColor(1)}"></div></div>` +
+      `<div class="db-score" id="dbs-${dim.id}">1 / 5</div>`;
+    c.appendChild(row);
+  });
+}
+
+function barColor(v) {
+  if (v <= 1) return '#639922';
+  if (v === 2) return '#639922';
+  if (v === 3) return '#ef9f27';
+  return '#e24b4a';
+}
+
+function updateDomainBars() {
+  DIMS.forEach(dim => {
+    const v = ans[dim.id] || 1;
+    const fill = document.getElementById('dbf-' + dim.id);
+    const score = document.getElementById('dbs-' + dim.id);
+    if (fill) { fill.style.width = (v / 5 * 100) + '%'; fill.style.background = barColor(v); }
+    if (score) score.textContent = v + ' / 5';
+  });
+}
+
+function resetAll() {
+  Object.keys(ans).forEach(k => delete ans[k]);
+  DIMS.forEach(dim => {
+    document.querySelectorAll(`.opt-item[data-dim="${dim.id}"]`).forEach(r => r.classList.remove('selected'));
+    const badge = document.getElementById('badge-' + dim.id);
+    if (badge) { badge.textContent = 'Sin respuesta'; badge.className = 'dim-badge'; }
+  });
+  evaVal = 50;
+  document.getElementById('eva-slider').value = 50;
+  document.getElementById('eva-display').textContent = '50';
+  document.getElementById('r-eva').textContent = '50';
+  document.getElementById('r-eva').className = 'r-val mid';
+  ['pNombre','pFecha','pHC'].forEach(id => document.getElementById(id).value = '');
+  updateResult();
+  updateDomainBars();
+}
+
+buildDims();
+updateResult();
+</script>
+</body>
+</html>
